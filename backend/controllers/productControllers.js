@@ -4,6 +4,11 @@ const catchAsyncErrors = require("../middleware/catchAsyncError");
 const ApiFeatures = require("../utils/apiFeatures");
 const cloudinary = require("cloudinary");
 
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 exports.createProduct = catchAsyncErrors(async (req, res, next) => {
   let images = [];
   if (typeof req.body.images === "string") {
@@ -11,7 +16,6 @@ exports.createProduct = catchAsyncErrors(async (req, res, next) => {
   } else {
     images = req.body.images;
   }
-
   const imagesLinks = [];
   for (let i = 0; i < images.length; i++) {
     const result = await cloudinary.v2.uploader.upload(images[i], {
@@ -28,7 +32,9 @@ exports.createProduct = catchAsyncErrors(async (req, res, next) => {
   req.body.user = req.user.id;
   req.body.price = parseInt(req.body.price);
   req.body.Stock = parseInt(req.body.Stock);
+
   const product = await Product.create(req.body);
+
   res.status(200).json({
     success: true,
     product,
